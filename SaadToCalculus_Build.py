@@ -27,6 +27,7 @@ calculus_req_json = {
 ss = json.dumps(calculus_req_json)
 calculus_req = json.loads(ss)
 BUILD_LOCATION = "\\\\bawibld41\\bldtmp\\sagars\\"
+MAX_REQUESTS = 2
 
 def create_json(calculus_req) :
     f = open(key+"_cal_req.json", "w")
@@ -102,14 +103,13 @@ response = requests.get(projects_url, headers=headers)
 projects = response.json()
 
 prod_configpsec = " "
-flame = " "
-operating_system = "_windows"
-run_once = 0
 key = " "
 calculus_name = " "
 project_name = " "
+req  = 0
+
 for project_dict in projects:
-    if run_once < 2 :
+    if req < MAX_REQUESTS :
         if len(str("{codebase}").format(**project_dict).strip()) == 0 :
             continue
         if 'Flame' not in str("{codebase}").format(**project_dict).strip() :
@@ -138,8 +138,8 @@ for project_dict in projects:
                 calculus_job_request = subprocess.call("python apiv10.py "+ key +"_cal_req.json")      
                 if os.path.exists(key +"_cal_req.json"):
                     os.remove(key +"_cal_req.json")
-                run_once = run_once + 1
+                req = req + 1
             else :
-                run_once = run_once + 1
+                req = req + 1
                 continue
                 
