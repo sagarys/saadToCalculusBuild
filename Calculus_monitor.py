@@ -47,9 +47,10 @@ def checkOsType(src_location) :
 
 def store_calculus_request(calReq,prodDir) :
     store_calculus_request = os.path.join(BUILD_LOCATION,prodDir,prodDir+"_cal_req.txt")
-    f = open(store_calculus_request, 'w')
-    f.write(calReq)
-    f.close()
+    if os.path.exists(os.path.join(BUILD_LOCATION,prodDir)):
+        f = open(store_calculus_request, 'w')
+        f.write(calReq)
+        f.close()
 
 for calculus_request in calculus_requests:
     build_sucess = False
@@ -90,6 +91,6 @@ for calculus_request in calculus_requests:
        print(r.text)
 if calculus_requests != remaining_calculus_requests :          
     f = open('cal_reqmon.txt', 'w')
-    for line in calculus_requests :
+    for line in remaining_calculus_requests :
         f.write(line)
     f.close()
