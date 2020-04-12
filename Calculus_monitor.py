@@ -7,12 +7,12 @@ import shutil
 import subprocess
 
 CALCULUS_HOST='calculus.efi.com'
-temp123 = " "
 f = open('cal_reqmon.txt', 'r')
 calculus_requests = f.readlines()
 f.close()
+
 remaining_calculus_requests = calculus_requests.copy()
-BUILD_LOCATION = "\\\\bawibld41\\bldtmp\\sagars\\"
+BUILD_LOCATION = "\\\\bawibld43\\bldtmp\\sagars\\"
 
 def linuxBuildCopy(src_location,prodDir,build_type):
     dpkg = src_location.split("\\").pop() + ".dpkg"
@@ -46,7 +46,7 @@ def checkOsType(src_location) :
     return False
 
 def store_calculus_request(calReq,prodDir) :
-    store_calculus_request = os.path.join(BUILD_LOCATION,dest_loc+"_cal_req.txt")
+    store_calculus_request = os.path.join(BUILD_LOCATION,prodDir,prodDir+"_cal_req.txt")
     f = open(store_calculus_request, 'w')
     f.write(calReq)
     f.close()
@@ -54,6 +54,7 @@ def store_calculus_request(calReq,prodDir) :
 for calculus_request in calculus_requests:
     build_sucess = False
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
+    store_calculus_request(calculus_request,r.json()['request']['name'])
     try:
         if(r.json()['request']['builds'][0]['status'] == "pass") :
             installer = format(r.json()['request']['builds'][0]['installer'])
