@@ -11,8 +11,9 @@ temp123 = " "
 f = open('cal_reqmon.txt', 'r')
 calculus_requests = f.readlines()
 f.close()
-remaining_calculus_requests = calculus_requests
+remaining_calculus_requests = calculus_requests.copy()
 BUILD_LOCATION = "\\\\bawibld41\\bldtmp\\sagars\\"
+
 def linuxBuildCopy(src_location,prodDir,build_type):
     dpkg = src_location.split("\\").pop() + ".dpkg"
     dpkg_roman = src_location.split("\\").pop() + "_roman.dpkg"
@@ -68,6 +69,7 @@ for calculus_request in calculus_requests:
         else:
             continue
         
+
         if(r.json()['request']['builds'][1]['status'] == "pass") :
             installer = format(r.json()['request']['builds'][1]['installer'])
             installer_location = installer.replace("/","\\").split(":").pop()
@@ -76,9 +78,10 @@ for calculus_request in calculus_requests:
                 linuxBuildCopy(installer_location,r.json()['request']['name'],"Release")
             else :
                 windowsBuildCopy(installer_location,r.json()['request']['name'],"Release")
-            remaining_calculus_requests.remove(calculus_request)
+            remaining_calculus_requests.remove(calculus_request)                
         elif (r.json()['request']['builds'][1]['status'] == "fail"):
             print("Release Build Failed for the request !!!! " + calculus_request)
+            remaining_calculus_requests.remove(calculus_request)
         else:
             continue
 
@@ -86,6 +89,6 @@ for calculus_request in calculus_requests:
        print(r.text)
 if calculus_requests != remaining_calculus_requests :          
     f = open('cal_reqmon.txt', 'w')
-    for line in remaining_calculus_requests :
+    for line in calculus_requests :
         f.write(line)
     f.close()
