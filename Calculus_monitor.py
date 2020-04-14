@@ -39,10 +39,11 @@ def windowsBuildCopy(src_location,prodDir,build_type) :
     subprocess.call(exe_copy)
 
 def checkOsType(src_location) :
-    list_dir = os.listdir(src_location)
-    for temp in os.listdir(src_location) :
-        if ".exe" in temp :
-            return True
+    if os.path.exists(src_location):
+        list_dir = os.listdir(src_location)
+        for temp in os.listdir(src_location) :
+            if ".exe" in temp :
+                return True
     return False
 
 def store_calculus_request(calReq,prodDir) :
@@ -53,7 +54,6 @@ def store_calculus_request(calReq,prodDir) :
         f.close()
 
 for calculus_request in calculus_requests:
-    build_sucess = False
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
     store_calculus_request(calculus_request,r.json()['request']['name'])
     try:
@@ -61,11 +61,10 @@ for calculus_request in calculus_requests:
             installer = format(r.json()['request']['builds'][0]['installer'])
             dest_loc = r.json()['request']['name']
             installer_location = installer.replace("/","\\").split(":").pop()
-            if os.path.exists(installer_location) :
-                if checkOsType(installer_location) == False :
-                    linuxBuildCopy(installer_location,r.json()['request']['name'],"Debug")
-                else :
-                    windowsBuildCopy(installer_location,r.json()['request']['name'],"Debug")
+            if checkOsType(installer_location) == False :
+                linuxBuildCopy(installer_location,r.json()['request']['name'],"Debug")
+            else :
+                windowsBuildCopy(installer_location,r.json()['request']['name'],"Debug")
         elif (r.json()['request']['builds'][0]['status'] == "fail"):
             print("Debug Build Failed for the request !!!! " + calculus_request)
         else:

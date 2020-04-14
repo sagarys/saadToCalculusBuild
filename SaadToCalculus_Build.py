@@ -140,6 +140,5 @@ for project_dict in projects:
                     os.remove(key +"_cal_req.json")
                 req = req + 1
             else :
-                req = req + 1
                 continue
                 
