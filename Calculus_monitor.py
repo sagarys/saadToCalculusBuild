@@ -44,6 +44,8 @@ def checkOsType(src_location) :
         for temp in os.listdir(src_location) :
             if ".exe" in temp :
                 return True
+    else 
+        print("Path does not exists :- " + src_location)
     return False
 
 def store_calculus_request(calReq,prodDir) :

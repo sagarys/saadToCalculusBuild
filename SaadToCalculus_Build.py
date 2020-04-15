@@ -129,11 +129,12 @@ for project_dict in projects:
         if response.status_code != 200 :
             print("Error Configspec not found for the product " + key + " with response status code "  + str(response.status_code))
         else :
-            print("Configspec found for the product and build triggered " + key)
+            print("Configspec found for the product" + key)
             format_configspec(response.text)
             calculus_req['request']['name'] = project_name
             create_dir(project_name)            
             if compare_configspec(project_name,calculus_req['request']['builds'][0]['configspec']):
+                print("Build triggered for the product" + key)
                 create_json(calculus_req)
                 calculus_job_request = subprocess.call("python apiv10.py "+ key +"_cal_req.json")      
                 if os.path.exists(key +"_cal_req.json"):
