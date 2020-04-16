@@ -1,5 +1,5 @@
 echo "copying....."
-ROBOCOPY %1 %2 /S /SEC /R:1 /W:1 /DCOPY:T /LOG:%3﻿
+ROBOCOPY %1 %2 /S /SEC /R:1 /W:1 /LOG:%3﻿
 echo "copied !!!!!!!!"
 
 IF %ERRORLEVEL% NEQ 1 ( 

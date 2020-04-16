@@ -21,9 +21,9 @@ def linuxBuildCopy(src_location,prodDir,build_type):
     dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
     if os.path.isdir(dest_loc) :
         shutil.rmtree(dest_loc)
-    dpkg_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg + " "+ prodDir +"_"+build_type+"_dpkg.log"
-    dpkg_roman_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_roman + " "+ prodDir +"_"+build_type+"_dpkg_roman.log"
-    dpkg_K2M_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_K2M + " "+ prodDir +"_"+build_type+"_dpkg_K2M.log"
+    dpkg_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg + " "+"\""+ prodDir +"_"+build_type+"_dpkg.log"+"\""
+    dpkg_roman_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_roman + " "+ "\""+prodDir +"_"+build_type+"_dpkg_roman.log"+ "\""
+    dpkg_K2M_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_K2M + " "+ "\""+prodDir +"_"+build_type+"_dpkg_K2M.log"+"\""
     if subprocess.call(dpkg_copy) != 0 :
         print("Copy Failed !!!!" + dpkg_copy)
     if subprocess.call(dpkg_roman_copy) != 0 :
@@ -44,7 +44,7 @@ def checkOsType(src_location) :
         for temp in os.listdir(src_location) :
             if ".exe" in temp :
                 return True
-    else 
+    else :
         print("Path does not exists :- " + src_location)
     return False
 
