@@ -55,6 +55,21 @@ def store_calculus_request(calReq,prodDir) :
         f.write(calReq)
         f.close()
 
+def store_symbols(installer_location,prodDir,build_type) :
+    symbolPath = installer_location.split("\\")
+    symbolPath = [i for i in symbolPath if i] 
+    K = 2
+    symbolPath = symbolPath[: -K or None] 
+    symbolPath = "\\\\".join(symbolPath)
+    symbolPath = "\\\\" +symbolPath
+    symbolPath = os.path.join(symbolPath,"runtime")
+    dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type,"pdbs")
+    for folder in os.listdir(symbolPath):
+        for pdb in os.listdir(os.path.join(symbolPath,folder,"server\\system\\")):
+            if pdb.split(".")[-1] == "pdb" :
+                pdb_copy ="copy_file.bat "+ os.path.join(symbolPath,folder,"server\\system\\") +" " +"\""+ dest_loc +"\""+" "+ pdb + " "+"\""+ prodDir +"_"+build_type+"_pdb.log"+"\""
+                subprocess.call(pdb_copy)
+        
 for calculus_request in calculus_requests:
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
     store_calculus_request(calculus_request,r.json()['request']['name'])
@@ -81,6 +96,7 @@ for calculus_request in calculus_requests:
                 linuxBuildCopy(installer_location,r.json()['request']['name'],"Release")
             else :
                 windowsBuildCopy(installer_location,r.json()['request']['name'],"Release")
+                store_symbols(installer_location,r.json()['request']['name'],"Release")
             remaining_calculus_requests.remove(calculus_request)                
         elif (r.json()['request']['builds'][1]['status'] == "fail"):
             print("Release Build Failed for the request !!!! " + calculus_request)
