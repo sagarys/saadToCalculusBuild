@@ -55,6 +55,17 @@ def store_calculus_request(calReq,prodDir) :
         f.write(calReq)
         f.close()
 
+def pdbLocation(installer_location,pdb_loc) :
+    installer_location_symbol = "runtime\\release\\server\\system\\"
+    symbolPath = installer_location.split("\\")
+    symbolPath = [i for i in symbolPath if i] 
+    K = 2
+    symbolPath = symbolPath[: -K or None] 
+    symbolPath = "\\\\".join(symbolPath)
+    symbolPath = "\\\\" +symbolPath
+    symbolPath = os.path.join(symbolPath,installer_location_symbol)
+    return symbolPath
+
 def store_symbols(installer_location,prodDir,build_type) :
     symbolPath = installer_location.split("\\")
     symbolPath = [i for i in symbolPath if i] 
@@ -69,7 +80,18 @@ def store_symbols(installer_location,prodDir,build_type) :
             if pdb.split(".")[-1] == "pdb" :
                 pdb_copy ="copy_file.bat "+ os.path.join(symbolPath,folder,"server\\system\\") +" " +"\""+ dest_loc +"\""+" "+ pdb + " "+"\""+ prodDir +"_"+build_type+"_pdb.log"+"\""
                 subprocess.call(pdb_copy)
-        
+
+def store_calFail_req(calculus_job_request,prodDir,build_type) :
+    print(calculus_job_request)
+    if os.path.exists("cal_Failures.txt"):
+        append_write = 'a' 
+    else:
+        append_write = 'w' 
+    f = open("cal_Failures.txt", append_write)
+    f.write("build failed for the product " + prodDir + " and the build type is " + build_type+"\n")
+    f.write(str(calculus_job_request)+"\n")
+    f.close()
+
 for calculus_request in calculus_requests:
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
     store_calculus_request(calculus_request,r.json()['request']['name'])
@@ -84,6 +106,7 @@ for calculus_request in calculus_requests:
                 windowsBuildCopy(installer_location,r.json()['request']['name'],"Debug")
         elif (r.json()['request']['builds'][0]['status'] == "fail"):
             print("Debug Build Failed for the request !!!! " + calculus_request)
+            store_calFail_req(calculus_request,r.json()['request']['name'],"Debug")
         else:
             continue
         
@@ -100,6 +123,7 @@ for calculus_request in calculus_requests:
             remaining_calculus_requests.remove(calculus_request)                
         elif (r.json()['request']['builds'][1]['status'] == "fail"):
             print("Release Build Failed for the request !!!! " + calculus_request)
+            store_calFail_req(calculus_request,r.json()['request']['name'],"Release")
             remaining_calculus_requests.remove(calculus_request)
         else:
             continue
