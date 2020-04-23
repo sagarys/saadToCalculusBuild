@@ -94,6 +94,9 @@ def store_calFail_req(calculus_job_request,prodDir,build_type) :
 
 for calculus_request in calculus_requests:
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
+    if (r.json()['request']['builds'][0]['status'] == "canceled") :
+            remaining_calculus_requests.remove(calculus_request)
+            continue
     store_calculus_request(calculus_request,r.json()['request']['name'])
     try:
         if(r.json()['request']['builds'][0]['status'] == "pass") :
