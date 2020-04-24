@@ -14,38 +14,17 @@ f.close()
 remaining_calculus_requests = calculus_requests.copy()
 BUILD_LOCATION = "\\\\bawibld43\\bldtmp\\sagars\\"
 
-def linuxBuildCopy(src_location,prodDir,build_type):
-    dpkg = src_location.split("\\").pop() + ".dpkg"
-    dpkg_roman = src_location.split("\\").pop() + "_roman.dpkg"
-    dpkg_K2M = src_location.split("\\").pop()+ "_k2m.dpkg"
-    dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
-    if os.path.isdir(dest_loc) :
-        shutil.rmtree(dest_loc)
-    dpkg_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg + " "+"\""+ prodDir +"_"+build_type+"_dpkg.log"+"\""
-    dpkg_roman_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_roman + " "+ "\""+prodDir +"_"+build_type+"_dpkg_roman.log"+ "\""
-    dpkg_K2M_copy ="copy_file.bat "+ src_location +" " +"\""+ dest_loc +"\""+" "+ dpkg_K2M + " "+ "\""+prodDir +"_"+build_type+"_dpkg_K2M.log"+"\""
-    if subprocess.call(dpkg_copy) != 0 :
-        print("Copy Failed !!!!" + dpkg_copy)
-    if subprocess.call(dpkg_roman_copy) != 0 :
-        print("Copy Failed !!!!" + dpkg_roman_copy)
-    if subprocess.call(dpkg_K2M_copy) != 0 :
-        print("Copy Failed !!!!" + dpkg_K2M_copy)
 
-def windowsBuildCopy(src_location,prodDir,build_type) :
+def CopyBuilds(src_location,prodDir,build_type) :
     dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
     if os.path.isdir(dest_loc) :
         shutil.rmtree(dest_loc)
     exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + r.json()['request']['name'] +"_"+build_type+"_windows.log" + "\""
     subprocess.call(exe_copy)
 
-def checkOsType(src_location) :
-    if os.path.exists(src_location):
-        list_dir = os.listdir(src_location)
-        for temp in os.listdir(src_location) :
-            if ".exe" in temp :
-                return True
-    else :
-        print("Path does not exists :- " + src_location)
+def checkWinOsType(osType) :
+    if (str(osType).find('windows') != -1): 
+        return True
     return False
 
 def store_calculus_request(calReq,prodDir) :
@@ -94,19 +73,15 @@ def store_calFail_req(calculus_job_request,prodDir,build_type) :
 
 for calculus_request in calculus_requests:
     r = requests.get("https://calculus.efi.com/api/v10/requests/"+calculus_request.split("/").pop().strip())
-    if (r.json()['request']['builds'][0]['status'] == "canceled") :
+    if (r.json()['request']['builds'][0]['status'] == "canceled" and r.json()['request']['builds'][1]['status'] == "canceled") :
             remaining_calculus_requests.remove(calculus_request)
             continue
-    store_calculus_request(calculus_request,r.json()['request']['name'])
     try:
         if(r.json()['request']['builds'][0]['status'] == "pass") :
             installer = format(r.json()['request']['builds'][0]['installer'])
             dest_loc = r.json()['request']['name']
-            installer_location = installer.replace("/","\\").split(":").pop()
-            if checkOsType(installer_location) == False :
-                linuxBuildCopy(installer_location,r.json()['request']['name'],"Debug")
-            else :
-                windowsBuildCopy(installer_location,r.json()['request']['name'],"Debug")
+            installer_location = installer.replace("/","\\").split(":").pop()   
+            CopyBuilds(installer_location,r.json()['request']['name'],"Debug")
         elif (r.json()['request']['builds'][0]['status'] == "fail"):
             print("Debug Build Failed for the request !!!! " + calculus_request)
             store_calFail_req(calculus_request,r.json()['request']['name'],"Debug")
@@ -118,11 +93,10 @@ for calculus_request in calculus_requests:
             installer = format(r.json()['request']['builds'][1]['installer'])
             installer_location = installer.replace("/","\\").split(":").pop()
             dest_loc = r.json()['request']['name']
-            if checkOsType(installer_location) == False :
-                linuxBuildCopy(installer_location,r.json()['request']['name'],"Release")
-            else :
-                windowsBuildCopy(installer_location,r.json()['request']['name'],"Release")
+            if checkWinOsType(r.json()['request']['builds'][1]['products']) != False :
                 store_symbols(installer_location,r.json()['request']['name'],"Release")
+            CopyBuilds(installer_location,r.json()['request']['name'],"Release")
+            store_calculus_request(calculus_request,r.json()['request']['name'])
             remaining_calculus_requests.remove(calculus_request)                
         elif (r.json()['request']['builds'][1]['status'] == "fail"):
             print("Release Build Failed for the request !!!! " + calculus_request)
