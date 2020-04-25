@@ -18,9 +18,13 @@ BUILD_LOCATION = "\\\\bawibld43\\bldtmp\\sagars\\"
 def CopyBuilds(src_location,prodDir,build_type) :
     dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
     if os.path.isdir(dest_loc) :
-        shutil.rmtree(dest_loc)
+        shutil.rmtree(dest_loc,ignore_errors=False,onerror=HandleError)
     exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + r.json()['request']['name'] +"_"+build_type+"_windows.log" + "\""
     subprocess.call(exe_copy)
+
+def HandleError(func, path, exc) :
+    print("Shutil delete error :- "+path) 
+    
 
 def checkWinOsType(osType) :
     if (str(osType).find('windows') != -1): 
@@ -96,9 +100,9 @@ for calculus_request in calculus_requests:
                 installer = format(r.json()['request']['builds'][1]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()
                 dest_loc = r.json()['request']['name']
+                CopyBuilds(installer_location,r.json()['request']['name'],"Release")
                 if checkWinOsType(r.json()['request']['builds'][1]['products']) != False :
                     store_symbols(installer_location,r.json()['request']['name'],"Release")
-                CopyBuilds(installer_location,r.json()['request']['name'],"Release")
                 store_calculus_request(calculus_request,r.json()['request']['name'])
                 remaining_calculus_requests.remove(calculus_request)                
             elif (r.json()['request']['builds'][1]['status'] == "fail"):
