@@ -12,7 +12,7 @@ calculus_requests = f.readlines()
 f.close()
 
 remaining_calculus_requests = calculus_requests.copy()
-BUILD_LOCATION = "\\\\bawibld43\\bldtmp\\sagars\\"
+BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
 
 
 def CopyBuilds(src_location,prodDir,build_type) :

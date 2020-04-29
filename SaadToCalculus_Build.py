@@ -26,7 +26,7 @@ calculus_req_json = {
 }
 ss = json.dumps(calculus_req_json)
 calculus_req = json.loads(ss)
-BUILD_LOCATION = "\\\\bawibld43\\bldtmp\\sagars\\"
+BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
 MAX_REQUESTS = 20
 
 def create_json(calculus_req) :
