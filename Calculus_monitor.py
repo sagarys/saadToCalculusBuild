@@ -18,8 +18,9 @@ BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
 def CopyBuilds(src_location,prodDir,build_type) :
     dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
     if os.path.isdir(dest_loc) :
-        shutil.rmtree(dest_loc,ignore_errors=False,onerror=HandleError)
-    exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + r.json()['request']['name'] +"_"+build_type+"_windows.log" + "\""
+        shutil.rmtree(dest_loc)
+        #shutil.rmtree(dest_loc,ignore_errors=False,onerror=HandleError)
+    exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + prodDir +"_"+build_type+"_windows.log" + "\""
     subprocess.call(exe_copy)
 
 def HandleError(func, path, exc) :
@@ -82,32 +83,32 @@ for calculus_request in calculus_requests:
             continue
     try:
         if(r.json()['request']['builds'][0]['status'] != "canceled") :
+            dest_loc = (r.json()['request']['name']).replace(" ","")
             if(r.json()['request']['builds'][0]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][0]['installer'])
-                dest_loc = r.json()['request']['name']
                 installer_location = installer.replace("/","\\").split(":").pop()   
-                CopyBuilds(installer_location,r.json()['request']['name'],"Debug")
+                CopyBuilds(installer_location,dest_loc,"Debug")
             elif (r.json()['request']['builds'][0]['status'] == "fail"):
                 print("Debug Build Failed for the request !!!! " + calculus_request)
-                store_calFail_req(calculus_request,r.json()['request']['name'],"Debug")
+                store_calFail_req(calculus_request,dest_loc,"Debug")
             else:
                 continue
         else:
             print("Debug Build Cancelled for the request !!!! " + calculus_request)
         
         if(r.json()['request']['builds'][1]['status'] != "canceled") :
+            dest_loc = (r.json()['request']['name']).replace(" ","")
             if(r.json()['request']['builds'][1]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][1]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()
-                dest_loc = r.json()['request']['name']
-                CopyBuilds(installer_location,r.json()['request']['name'],"Release")
+                CopyBuilds(installer_location,dest_loc,"Release")
                 if checkWinOsType(r.json()['request']['builds'][1]['products']) != False :
-                    store_symbols(installer_location,r.json()['request']['name'],"Release")
-                store_calculus_request(calculus_request,r.json()['request']['name'])
+                    store_symbols(installer_location,dest_loc,"Release")
+                store_calculus_request(calculus_request,dest_loc)
                 remaining_calculus_requests.remove(calculus_request)                
             elif (r.json()['request']['builds'][1]['status'] == "fail"):
                 print("Release Build Failed for the request !!!! " + calculus_request)
-                store_calFail_req(calculus_request,r.json()['request']['name'],"Release")
+                store_calFail_req(calculus_request,dest_loc,"Release")
                 remaining_calculus_requests.remove(calculus_request)
             else:
                 continue

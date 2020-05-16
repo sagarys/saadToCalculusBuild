@@ -131,7 +131,8 @@ for project_dict in projects:
         else :
             print("Configspec found for the product " + key)
             format_configspec(response.text)
-            calculus_req['request']['name'] = project_name
+            (calculus_req['request']['name'])= project_name
+            project_name = project_name.replace(" ","")
             create_dir(project_name)            
             if compare_configspec(project_name,calculus_req['request']['builds'][0]['configspec']):
                 print("Build triggered for the product " + key)
