@@ -20,7 +20,7 @@ def CopyBuilds(src_location,prodDir,build_type) :
     if os.path.isdir(dest_loc) :
         shutil.rmtree(dest_loc)
         #shutil.rmtree(dest_loc,ignore_errors=False,onerror=HandleError)
-    exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + prodDir +"_"+build_type+"_windows.log" + "\""
+    exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\"" + prodDir +"_"+build_type+".log" + "\""
     subprocess.call(exe_copy)
 
 def HandleError(func, path, exc) :
