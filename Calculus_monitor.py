@@ -18,6 +18,8 @@ BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
 def CopyBuilds(src_location,prodDir,build_type) :
     dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type)
     if os.path.isdir(dest_loc) :
+        remReadonly = "remReadonly.bat "+dest_loc
+        subprocess.call(remReadonly)
         shutil.rmtree(dest_loc)
         #shutil.rmtree(dest_loc,ignore_errors=False,onerror=HandleError)
     exe_copy = "copy_dir.bat "+ installer_location +" " +"\""+ dest_loc +"\""+" "+ "\""+".\Log\\" + prodDir +"_"+build_type+".log" + "\""
@@ -62,7 +64,7 @@ def store_symbols(installer_location,prodDir,build_type) :
     for folder in os.listdir(symbolPath):
         for pdb in os.listdir(os.path.join(symbolPath,folder,"server\\system\\")):
             if pdb.split(".")[-1] == "pdb" :
-                pdb_copy ="copy_file.bat "+ os.path.join(symbolPath,folder,"server\\system\\") +" " +"\""+ dest_loc +"\""+" "+ pdb + " "+"\""+ prodDir +"_"+build_type+"_pdb.log"+"\""
+                pdb_copy ="copy_file.bat "+ os.path.join(symbolPath,folder,"server\\system\\") +" " +"\""+ dest_loc +"\""+" "+ pdb + " "+"\""+".\Log\\"+ prodDir +"_"+build_type+"_pdb.log"+"\""
                 subprocess.call(pdb_copy)
 
 def store_calFail_req(calculus_job_request,prodDir,build_type) :
