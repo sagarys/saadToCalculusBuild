@@ -26,7 +26,7 @@ calculus_req_json = {
 }
 ss = json.dumps(calculus_req_json)
 calculus_req = json.loads(ss)
-BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
+BUILD_LOCATION = "\\\\bawdfs01\\OUTBOX\\TO-FC\\Sustaining_Builds"
 MAX_REQUESTS = 20
 
 def create_json(calculus_req) :
@@ -41,16 +41,16 @@ def store_cal_req(calculus_job_request) :
     else:
         append_write = 'w' 
     f = open("cal_reqmon.txt", append_write)
-    f.write(str(calculus_job_request))
+    f.writelines(str(calculus_job_request))
     f.close()
     
 def create_dir(dir_name):
     if not os.path.isdir (os.path.join(BUILD_LOCATION,dir_name)):
         os.mkdir (os.path.join(BUILD_LOCATION,dir_name))
 
-def compare_configspec(dir_name,configspec):
+def compare_configspec(oem_name,dir_name,configspec):
     dir_name = dir_name.rstrip()
-    configspec_path = os.path.join(BUILD_LOCATION,dir_name,dir_name+"_configspec.txt")
+    configspec_path = os.path.join(BUILD_LOCATION,oem_name,dir_name,dir_name+"_configspec.txt")
     if not os.path.exists(configspec_path) and not os.path.isfile(configspec_path):
         f = open(configspec_path, "w")
         f.write(configspec)
@@ -131,10 +131,12 @@ for project_dict in projects:
         else :
             print("Configspec found for the product " + key)
             format_configspec(response.text)
-            (calculus_req['request']['name'])= project_name
+            oem_name = str("{oem}").format(**project_dict)
             project_name = project_name.replace(" ","")
-            create_dir(project_name)            
-            if compare_configspec(project_name,calculus_req['request']['builds'][0]['configspec']):
+            (calculus_req['request']['name'])= oem_name+"__"+project_name
+            create_dir(oem_name)            
+            create_dir(os.path.join(oem_name,project_name))           
+            if compare_configspec(oem_name,project_name,calculus_req['request']['builds'][0]['configspec']):
                 print("Build triggered for the product " + key)
                 create_json(calculus_req)
                 calculus_job_request = subprocess.call("python apiv10.py "+ key +"_cal_req.json")      

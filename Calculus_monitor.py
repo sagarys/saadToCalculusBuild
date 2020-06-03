@@ -12,7 +12,7 @@ calculus_requests = f.readlines()
 f.close()
 
 remaining_calculus_requests = calculus_requests.copy()
-BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
+BUILD_LOCATION = "\\\\bawdfs01\\OUTBOX\\TO-FC\\Sustaining_Builds"
 
 
 def CopyBuilds(src_location,prodDir,build_type) :
@@ -85,7 +85,8 @@ for calculus_request in calculus_requests:
             continue
     try:
         if(r.json()['request']['builds'][0]['status'] != "canceled") :
-            dest_loc = (r.json()['request']['name']).replace(" ","")
+            prod_name = (r.json()['request']['name']).replace(" ","").split("__")
+            dest_loc = os.path.join(prod_name[0],prod_name[1])
             if(r.json()['request']['builds'][0]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][0]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()   
@@ -99,7 +100,8 @@ for calculus_request in calculus_requests:
             print("Debug Build Cancelled for the request !!!! " + calculus_request)
         
         if(r.json()['request']['builds'][1]['status'] != "canceled") :
-            dest_loc = (r.json()['request']['name']).replace(" ","")
+            prod_name = (r.json()['request']['name']).replace(" ","").split("__")
+            dest_loc = os.path.join(prod_name[0],prod_name[1])
             if(r.json()['request']['builds'][1]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][1]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()
