@@ -21,9 +21,54 @@ calculus_req_json = {
         "configspec"          : "",
         "products"            : ["",""]
       }
-      ]
+      ],
+      "installs" : [
+      {
+        "product"             : "",
+        "livelink"            : "true"
+      },
+      {
+        "product"             : "",
+        "livelink"            : "true"
+      }
+    ],
+    "tests" : [
+      {
+        "product"             : "",
+        "timeout_seconds"     : 6000,
+      
+      "suite"               : 
+        [
+            {
+                "exe" : "wait_ready",
+                "timeout_seconds" : 80000,
+            },
+            {
+                "exe" : "InternalPage_test",
+                "timeout_seconds" : 80000,
+            }
+        ]
+        },
+        {
+        "product"             : "",
+        "timeout_seconds"     : 6000,
+      
+      "suite"               : 
+        [
+            {
+                "exe" : "wait_ready",
+                "timeout_seconds" : 80000,
+            },
+            {
+                "exe" : "InternalPage_test",
+                "timeout_seconds" : 80000,
+            }
+        ]
+        }
+    ]
   }
 }
+
 ss = json.dumps(calculus_req_json)
 calculus_req = json.loads(ss)
 BUILD_LOCATION = "\\\\bawdfs01\\OUTBOX\\TO-FC\\Sustaining_Builds"
@@ -44,9 +89,15 @@ def store_cal_req(calculus_job_request) :
     f.writelines(str(calculus_job_request))
     f.close()
     
-def create_dir(dir_name):
-    if not os.path.isdir (os.path.join(BUILD_LOCATION,dir_name)):
-        os.mkdir (os.path.join(BUILD_LOCATION,dir_name))
+# def create_dir(dir_name):
+    # if not os.path.isdir (os.path.join(BUILD_LOCATION,dir_name)):
+        # os.mkdir (os.path.join(BUILD_LOCATION,dir_name))
+
+def create_dir(oem,prodDir):
+    if not os.path.isdir (os.path.join(BUILD_LOCATION,oem)):
+        os.mkdir (os.path.join(BUILD_LOCATION,oem))
+    if not os.path.isdir (os.path.join(BUILD_LOCATION,oem,prodDir)):
+        os.mkdir (os.path.join(BUILD_LOCATION,oem,prodDir))
 
 def compare_configspec(oem_name,dir_name,configspec):
     dir_name = dir_name.rstrip()
@@ -123,7 +174,11 @@ for project_dict in projects:
         if len(str("{calculus name}").format(**project_dict).strip()) == 0 :
             continue
         calculus_req['request']['builds'][0]['products'][0] = calculus_name + '/'+'debug' 
-        calculus_req['request']['builds'][0]['products'][1] = calculus_name + '/'+'release' 
+        calculus_req['request']['builds'][0]['products'][1] = calculus_name + '/'+'release'
+        calculus_req['request']['installs'][0]['product'] = calculus_name + '/'+'debug' 
+        calculus_req['request']['installs'][1]['product'] = calculus_name + '/'+'release' 
+        calculus_req['request']['tests'][0]['product'] = calculus_name + '/'+'debug' 
+        calculus_req['request']['tests'][1]['product'] = calculus_name + '/'+'release' 
         prod_configpsec = "http://saad.efi.com/api/v0/projects/"+str("{key}".format(**project_dict))+"/configspec"
         response = requests.get(prod_configpsec, headers=headers)
         if response.status_code != 200 :
@@ -134,8 +189,8 @@ for project_dict in projects:
             oem_name = str("{oem}").format(**project_dict)
             project_name = project_name.replace(" ","")
             (calculus_req['request']['name'])= oem_name+"__"+project_name
-            create_dir(oem_name)            
-            create_dir(os.path.join(oem_name,project_name))           
+            # create_dir(oem_name)            
+            create_dir(oem_name,project_name)           
             if compare_configspec(oem_name,project_name,calculus_req['request']['builds'][0]['configspec']):
                 print("Build triggered for the product " + key)
                 create_json(calculus_req)

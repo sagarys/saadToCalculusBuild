@@ -35,7 +35,8 @@ def checkWinOsType(osType) :
     return False
 
 def store_calculus_request(calReq,prodDir) :
-    store_calculus_request = os.path.join(BUILD_LOCATION,prodDir,prodDir+"_cal_req.txt")
+    prdName = prodDir.split('\\')[-1]
+    store_calculus_request = os.path.join(BUILD_LOCATION,prodDir,prdName+"_cal_req.txt")
     if os.path.exists(os.path.join(BUILD_LOCATION,prodDir)):
         f = open(store_calculus_request, 'w')
         f.write(calReq)
@@ -52,6 +53,18 @@ def pdbLocation(installer_location,pdb_loc) :
     symbolPath = os.path.join(symbolPath,installer_location_symbol)
     return symbolPath
 
+def copyBreakPadSymbols(prodDir) :
+    symbolPath = installer_location.split("\\")
+    symbolPath = [i for i in symbolPath if i] 
+    K = 2
+    symbolPath = symbolPath[: -K or None] 
+    symbolPath = "\\\\".join(symbolPath)
+    symbolPath = "\\\\" +symbolPath
+    symbolPath = os.path.join(symbolPath,"symbols")
+    dest_loc = os.path.join(BUILD_LOCATION,prodDir,"symbols")
+    exe_copy = "copy_dir.bat "+ symbolPath +" " +"\""+ dest_loc +"\""+" "+ "\""+".\Log\\" + prodDir +"_breakpadsymbols"+".log" + "\""
+    subprocess.call(exe_copy)
+    
 def store_symbols(installer_location,prodDir,build_type) :
     symbolPath = installer_location.split("\\")
     symbolPath = [i for i in symbolPath if i] 
@@ -60,7 +73,7 @@ def store_symbols(installer_location,prodDir,build_type) :
     symbolPath = "\\\\".join(symbolPath)
     symbolPath = "\\\\" +symbolPath
     symbolPath = os.path.join(symbolPath,"runtime")
-    dest_loc = os.path.join(BUILD_LOCATION,prodDir,build_type,"pdbs")
+    dest_loc = os.path.join(BUILD_LOCATION,prodDir,"pdbs")
     for folder in os.listdir(symbolPath):
         for pdb in os.listdir(os.path.join(symbolPath,folder,"server\\system\\")):
             if pdb.split(".")[-1] == "pdb" :
@@ -108,6 +121,7 @@ for calculus_request in calculus_requests:
                 CopyBuilds(installer_location,dest_loc,"Release")
                 if checkWinOsType(r.json()['request']['builds'][1]['products']) != False :
                     store_symbols(installer_location,dest_loc,"Release")
+                    copyBreakPadSymbols(dest_loc)
                 store_calculus_request(calculus_request,dest_loc)
                 remaining_calculus_requests.remove(calculus_request)                
             elif (r.json()['request']['builds'][1]['status'] == "fail"):
