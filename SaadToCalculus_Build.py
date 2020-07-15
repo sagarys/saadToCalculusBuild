@@ -89,10 +89,6 @@ def store_cal_req(calculus_job_request) :
     f.writelines(str(calculus_job_request))
     f.close()
     
-# def create_dir(dir_name):
-    # if not os.path.isdir (os.path.join(BUILD_LOCATION,dir_name)):
-        # os.mkdir (os.path.join(BUILD_LOCATION,dir_name))
-
 def create_dir(oem,prodDir):
     if not os.path.isdir (os.path.join(BUILD_LOCATION,oem)):
         os.mkdir (os.path.join(BUILD_LOCATION,oem))
@@ -189,7 +185,8 @@ for project_dict in projects:
             oem_name = str("{oem}").format(**project_dict)
             project_name = project_name.replace(" ","")
             (calculus_req['request']['name'])= oem_name+"__"+project_name
-            # create_dir(oem_name)            
+            if project_name == "EFI_CoplandRv1.1" or project_name == "EFI_Bernsteinv1.1R":
+                    calculus_req['request']['builds'][0]['arguments'] = "all USE_CACHE=1 BITS=64 LINKER=VC9"
             create_dir(oem_name,project_name)           
             if compare_configspec(oem_name,project_name,calculus_req['request']['builds'][0]['configspec']):
                 print("Build triggered for the product " + key)
