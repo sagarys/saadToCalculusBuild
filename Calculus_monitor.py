@@ -27,7 +27,6 @@ def CopyBuilds(src_location,prodDir,build_type) :
 
 def HandleError(func, path, exc) :
     print("Shutil delete error :- "+path) 
-    
 
 def checkWinOsType(osType) :
     if (str(osType).find('windows') != -1): 
@@ -80,13 +79,13 @@ def store_symbols(installer_location,prodDir,build_type) :
                 pdb_copy ="copy_file.bat "+ os.path.join(symbolPath,folder,"server\\system\\") +" " +"\""+ dest_loc +"\""+" "+ pdb + " "+"\""+".\Log\\"+ prodDir +"_"+build_type+"_pdb.log"+"\""
                 subprocess.call(pdb_copy)
 
-def store_calFail_req(calculus_job_request,prodDir,build_type) :
+def store_calFail_req(calculus_job_request,prodDir,build_type,fileName) :
     print(calculus_job_request)
-    if os.path.exists("cal_Failures.txt"):
+    if os.path.exists(fileName):
         append_write = 'a' 
     else:
         append_write = 'w' 
-    f = open("cal_Failures.txt", append_write)
+    f = open(fileName, append_write)
     f.write("build failed for the product " + prodDir + " and the build type is " + build_type+"\n")
     f.write(str(calculus_job_request)+"\n")
     f.close()
@@ -97,25 +96,31 @@ for calculus_request in calculus_requests:
             remaining_calculus_requests.remove(calculus_request)
             continue
     try:
-        if(r.json()['request']['builds'][0]['status'] != "canceled") :
+        if(r.json()['request']['builds'][0]['status'] != "canceled" and r.json()['request']['installs'][0]['status'] != "canceled" and r.json()['request']['tests'][0]['status'] != "canceled") :
             prod_name = (r.json()['request']['name']).replace(" ","").split("__")
             dest_loc = os.path.join(prod_name[0],prod_name[1])
-            if(r.json()['request']['builds'][0]['status'] == "pass") :
+            if(r.json()['request']['builds'][0]['status'] == "pass" and r.json()['request']['installs'][0]['status'] == "pass" and r.json()['request']['tests'][0]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][0]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()   
                 CopyBuilds(installer_location,dest_loc,"Debug")
             elif (r.json()['request']['builds'][0]['status'] == "fail"):
                 print("Debug Build Failed for the request !!!! " + calculus_request)
-                store_calFail_req(calculus_request,dest_loc,"Debug")
+                store_calFail_req(calculus_request,dest_loc,"Debug","cal_Failures.txt")
+            elif (r.json()['request']['installs'][0]['status'] == "fail"):
+                print("Debug Build Failed for the request !!!! " + calculus_request)
+                store_calFail_req(calculus_request,dest_loc,"Debug","cal_install_Failures.txt")
+            elif (r.json()['request']['tests'][0]['status'] == "fail"):
+                print("Debug Build Failed for the request !!!! " + calculus_request)
+                store_calFail_req(calculus_request,dest_loc,"Debug","cal_tests_Failures.txt")
             else:
                 continue
         else:
             print("Debug Build Cancelled for the request !!!! " + calculus_request)
         
-        if(r.json()['request']['builds'][1]['status'] != "canceled") :
+        if(r.json()['request']['builds'][1]['status'] != "canceled" and r.json()['request']['installs'][1]['status'] != "canceled" and r.json()['request']['tests'][1]['status'] != "canceled") :
             prod_name = (r.json()['request']['name']).replace(" ","").split("__")
             dest_loc = os.path.join(prod_name[0],prod_name[1])
-            if(r.json()['request']['builds'][1]['status'] == "pass") :
+            if(r.json()['request']['builds'][1]['status'] == "pass" and r.json()['request']['installs'][1]['status'] == "pass" and r.json()['request']['tests'][1]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][1]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()
                 CopyBuilds(installer_location,dest_loc,"Release")
@@ -126,7 +131,13 @@ for calculus_request in calculus_requests:
                 remaining_calculus_requests.remove(calculus_request)                
             elif (r.json()['request']['builds'][1]['status'] == "fail"):
                 print("Release Build Failed for the request !!!! " + calculus_request)
-                store_calFail_req(calculus_request,dest_loc,"Release")
+                store_calFail_req(calculus_request,dest_loc,"Release","cal_Failures.txt")
+            elif (r.json()['request']['installs'][1]['status'] == "fail"):
+                print("Release Build Failed for the request !!!! " + calculus_request)
+                store_calFail_req(calculus_request,dest_loc,"Release","cal_install_Failures.txt")
+            elif (r.json()['request']['tests'][1]['status'] == "fail"):
+                print("Release Build Failed for the request !!!! " + calculus_request)
+                store_calFail_req(calculus_request,dest_loc,"Release","cal_tests_Failures.txt")
                 remaining_calculus_requests.remove(calculus_request)
             else:
                 continue
