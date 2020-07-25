@@ -186,7 +186,7 @@ for project_dict in projects:
             project_name = project_name.replace(" ","")
             (calculus_req['request']['name'])= oem_name+"__"+project_name
             if project_name == "EFI_CoplandRv1.1" or project_name == "EFI_Bernsteinv1.1R":
-                    calculus_req['request']['builds'][0]['arguments'] = "all USE_CACHE=1 BITS=64 LINKER=VC9"
+                calculus_req['request']['builds'][0]['arguments'] = "all USE_CACHE=1 BITS=64 LINKER=VC9"
             create_dir(oem_name,project_name)           
             if compare_configspec(oem_name,project_name,calculus_req['request']['builds'][0]['configspec']):
                 print("Build triggered for the product " + key)
