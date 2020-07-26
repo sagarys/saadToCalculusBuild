@@ -99,7 +99,7 @@ for calculus_request in calculus_requests:
         if(r.json()['request']['builds'][0]['status'] != "canceled" and r.json()['request']['installs'][0]['status'] != "canceled" and r.json()['request']['tests'][0]['status'] != "canceled") :
             prod_name = (r.json()['request']['name']).replace(" ","").split("__")
             dest_loc = os.path.join(prod_name[0],prod_name[1])
-            if(r.json()['request']['builds'][0]['status'] == "pass" and r.json()['request']['installs'][0]['status'] == "pass" and r.json()['request']['tests'][0]['status'] == "pass") :
+            if(r.json()['request']['builds'][0]['status'] == "pass" or r.json()['request']['installs'][0]['status'] == "pass" or r.json()['request']['tests'][0]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][0]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()   
                 CopyBuilds(installer_location,dest_loc,"Debug")
@@ -120,7 +120,7 @@ for calculus_request in calculus_requests:
         if(r.json()['request']['builds'][1]['status'] != "canceled" and r.json()['request']['installs'][1]['status'] != "canceled" and r.json()['request']['tests'][1]['status'] != "canceled") :
             prod_name = (r.json()['request']['name']).replace(" ","").split("__")
             dest_loc = os.path.join(prod_name[0],prod_name[1])
-            if(r.json()['request']['builds'][1]['status'] == "pass" and r.json()['request']['installs'][1]['status'] == "pass" and r.json()['request']['tests'][1]['status'] == "pass") :
+            if(r.json()['request']['builds'][1]['status'] == "pass" or r.json()['request']['installs'][1]['status'] == "pass" or r.json()['request']['tests'][1]['status'] == "pass") :
                 installer = format(r.json()['request']['builds'][1]['installer'])
                 installer_location = installer.replace("/","\\").split(":").pop()
                 CopyBuilds(installer_location,dest_loc,"Release")
@@ -132,12 +132,14 @@ for calculus_request in calculus_requests:
             elif (r.json()['request']['builds'][1]['status'] == "fail"):
                 print("Release Build Failed for the request !!!! " + calculus_request)
                 store_calFail_req(calculus_request,dest_loc,"Release","cal_Failures.txt")
+                remaining_calculus_requests.remove(calculus_request)
             elif (r.json()['request']['installs'][1]['status'] == "fail"):
                 print("Release Build Failed for the request !!!! " + calculus_request)
                 store_calFail_req(calculus_request,dest_loc,"Release","cal_install_Failures.txt")
+                remaining_calculus_requests.remove(calculus_request)
             elif (r.json()['request']['tests'][1]['status'] == "fail"):
                 print("Release Build Failed for the request !!!! " + calculus_request)
-                store_calFail_req(calculus_request,dest_loc,"Release","cal_tests_Failures.txt")
+                store_calFail_req(calculus_request,dest_loc,"Release","cal_tests_Failures.txt")                       
                 remaining_calculus_requests.remove(calculus_request)
             else:
                 continue
