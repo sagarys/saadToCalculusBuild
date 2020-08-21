@@ -6,7 +6,12 @@ import pprint
 import subprocess
 import json
 
-SAAD = "https://saad.efi.com"
+if len(sys.argv) == 2 :
+    SAAD =sys.argv[1]
+else :
+    print("Please pass the saad url ")
+    sys.exit(2)
+    
 calculus_req_json = {
   "request" : {
     "name"                  : "",
@@ -71,7 +76,7 @@ calculus_req_json = {
 
 ss = json.dumps(calculus_req_json)
 calculus_req = json.loads(ss)
-BUILD_LOCATION = "\\\\bawdfs01\\OUTBOX\\TO-FC\\Sustaining_Builds"
+BUILD_LOCATION = "\\\\bauser\\Fiery-products\\Sustaining_builds"
 MAX_REQUESTS = 20
 
 def create_json(calculus_req) :
@@ -175,7 +180,7 @@ for project_dict in projects:
         calculus_req['request']['installs'][1]['product'] = calculus_name + '/'+'release' 
         calculus_req['request']['tests'][0]['product'] = calculus_name + '/'+'debug' 
         calculus_req['request']['tests'][1]['product'] = calculus_name + '/'+'release' 
-        prod_configpsec = "http://saad.efi.com/api/v0/projects/"+str("{key}".format(**project_dict))+"/configspec"
+        prod_configpsec = "{saad}/api/v0/projects/".format(saad=SAAD)+str("{key}".format(**project_dict))+"/configspec"
         response = requests.get(prod_configpsec, headers=headers)
         if response.status_code != 200 :
             print("Error Configspec not found for the product " + key + " with response status code "  + str(response.status_code))
